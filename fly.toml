@@ -1,0 +1,25 @@
+# BrandFlow — Fly.io configuration
+# Docs: https://fly.io/docs/reference/configuration/
+
+app = 'brandflow'
+primary_region = 'iad'   # Ashburn, VA — good default for global reach
+
+[build]
+  # Uses the Dockerfile in this directory
+
+[http_service]
+  internal_port       = 3000
+  force_https         = true
+  auto_stop_machines  = false   # Keep alive — no cold starts for paying users
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type       = "connections"
+    hard_limit = 100
+    soft_limit = 80
+
+[[vm]]
+  memory   = '512mb'
+  cpu_kind = 'shared'
+  cpus     = 1
