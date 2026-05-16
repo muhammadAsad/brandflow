@@ -457,7 +457,7 @@ export default function ConversationsPage() {
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'messages',
         filter: `conversation_id=eq.${selected.id}`,
-      }, (payload) => {
+      }, (payload: { new: unknown }) => {
         const msg = payload.new as Message;
         setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
         setConversations(prev => prev.map(c =>
