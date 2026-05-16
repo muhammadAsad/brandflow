@@ -65,21 +65,10 @@ const CAMPAIGN_TYPES = [
   { key: 'engagement',  label: 'Engagement',  icon: Users,      desc: 'Boost interactions & shares'   },
 ];
 
-const DEMO_CAMPAIGNS: Campaign[] = [
-  { id: 'd1', name: 'Summer Sale 2024',    description: 'Promote our summer collection across all platforms with focus on Instagram and Facebook.', status: 'active',    budget: 4200,  spent: 2100, reach: 84000,  impressions: 220000, clicks: 3528, conversions: 142, ctr: 4.2, platforms: ['instagram','facebook'], start_date: '2024-06-01', end_date: '2024-06-30', created_at: '2024-05-28' },
-  { id: 'd2', name: 'Brand Awareness Q2',  description: 'Quarterly brand awareness push to reach new audience segments on LinkedIn and Instagram.', status: 'active',    budget: 8000,  spent: 5600, reach: 240000, impressions: 580000, clicks: 6720, conversions: 380, ctr: 2.8, platforms: ['instagram','linkedin'],  start_date: '2024-04-01', end_date: '2024-06-30', created_at: '2024-03-25' },
-  { id: 'd3', name: 'Product Launch',      description: 'New product line launch campaign targeting younger demographic on TikTok and Facebook.',   status: 'paused',    budget: 12000, spent: 3200, reach: 47000,  impressions: 142000, clicks: 1457, conversions:  89, ctr: 3.1, platforms: ['facebook','tiktok'],    start_date: '2024-05-15', end_date: '2024-07-15', created_at: '2024-05-10' },
-  { id: 'd4', name: 'Holiday Campaign',    description: 'End of year holiday sale targeting existing customers and lookalike audiences.',            status: 'draft',     budget: 6500,  spent: 0,    reach: 0,      impressions: 0,      clicks: 0,    conversions:   0, ctr: 0,   platforms: ['instagram'],             start_date: '2024-11-25', end_date: '2024-12-31', created_at: '2024-05-01' },
-  { id: 'd5', name: 'Influencer Collab Q3', description: 'Collaboration with micro-influencers for authentic product reviews and unboxing content.',  status: 'completed', budget: 3500,  spent: 3480, reach: 126000, impressions: 310000, clicks: 4410, conversions: 201, ctr: 3.5, platforms: ['instagram','youtube','tiktok'], start_date: '2024-01-01', end_date: '2024-03-31', created_at: '2023-12-20' },
-];
+// No demo data — campaigns load from Supabase via /api/campaigns
 
-// Demo reach trend for detail panel
-const REACH_TREND = [
-  { day: 'Day 1', reach: 2100 }, { day: 'Day 3', reach: 4800 }, { day: 'Day 5', reach: 7200 },
-  { day: 'Day 7', reach: 11000 }, { day: 'Day 10', reach: 18000 }, { day: 'Day 14', reach: 24000 },
-  { day: 'Day 18', reach: 31000 }, { day: 'Day 21', reach: 38000 }, { day: 'Day 25', reach: 44000 },
-  { day: 'Day 30', reach: 52000 },
-];
+// Empty reach trend — populated with real data when available
+const REACH_TREND: { day: string; reach: number }[] = [];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -440,8 +429,7 @@ function DetailPanel({
 
   const handleDelete = async () => {
     if (!confirm(`Delete "${campaign.name}"?`)) return;
-    if (campaign.id.startsWith('d')) { onDelete(campaign.id); return; }
-    await fetch(`/api/campaigns?id=${campaign.id}`, { method: 'DELETE' });
+    await fetch(`/api/campaigns?id=${campaign.id}`, { method: 'DELETE' }).catch(() => {});
     onDelete(campaign.id);
   };
 
@@ -612,8 +600,8 @@ export default function CampaignsPage() {
     try {
       const res = await fetch('/api/campaigns');
       const json = await res.json();
-      setCampaigns(json.campaigns?.length > 0 ? json.campaigns : DEMO_CAMPAIGNS);
-    } catch { setCampaigns(DEMO_CAMPAIGNS); }
+      setCampaigns(json.campaigns ?? []);
+    } catch { setCampaigns([]); }
     finally { setLoading(false); }
   }, []);
 
@@ -643,7 +631,7 @@ export default function CampaignsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!id.startsWith('d')) await fetch(`/api/campaigns?id=${id}`, { method: 'DELETE' });
+    await fetch(`/api/campaigns?id=${id}`, { method: 'DELETE' }).catch(() => {});
     setCampaigns(p => p.filter(c => c.id !== id));
     if (selected?.id === id) setSelected(null);
     setDropdown(null);
@@ -651,11 +639,11 @@ export default function CampaignsPage() {
 
   const toggleStatus = async (campaign: Campaign) => {
     const next = campaign.status === 'active' ? 'paused' : 'active';
-    if (!campaign.id.startsWith('d')) {
+    try {
       const res = await fetch('/api/campaigns', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: campaign.id, status: next }) });
       const json = await res.json();
       if (res.ok) handleSaved(json.campaign);
-    } else {
+    } catch {
       handleSaved({ ...campaign, status: next as CampaignStatus });
     }
     setDropdown(null);

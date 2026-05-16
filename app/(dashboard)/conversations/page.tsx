@@ -62,65 +62,7 @@ const PLATFORM_CHAR_LIMIT: Record<string, number | null> = {
 
 const EMOJIS = ['😊','😂','❤️','👍','🎉','🙌','💪','🔥','✨','👏','😍','🤝','💡','📈','🚀','👋','😎','🌟','💯','🎯','😅','🏆','💬','📣','🎨','⚡','🌈','🙏','👀','💎'];
 
-// ── Demo data ──────────────────────────────────────────────────────────────────
-
-const T = Date.now();
-const ago = (m: number) => new Date(T - m * 60000).toISOString();
-
-const DEMO_CONTACTS_MAP: Record<string, ConvContact> = {
-  dc1: { id:'dc1', full_name:'Sarah Johnson',  company:'TechCorp',   email:'sarah@techcorp.com'  },
-  dc2: { id:'dc2', full_name:'Michael Chen',   company:'StartupIO',  email:'mchen@startup.io'    },
-  dc3: { id:'dc3', full_name:'Emma Williams',  company:'DesignCo',   email:'emma@designco.com'   },
-  dc4: { id:'dc4', full_name:'James Brown',    company:'Agency Net', email:'jbrown@agency.net'   },
-  dc5: { id:'dc5', full_name:'Priya Patel',    company:'GrowthLab', email:'priya@growthlab.co'  },
-  dc6: { id:'dc6', full_name:'Cameron Wilson', company:'MediaPeak',  email:'cam@mediapeak.com'   },
-};
-
-const DEMO_CONVERSATIONS: Conversation[] = [
-  { id:'cv1', platform:'Instagram', status:'open',     last_message:"Loved your analytics post! Can we chat?",      last_message_at:ago(2),   unread_count:2, created_at:ago(1440), contact_id:'dc1', contact:DEMO_CONTACTS_MAP.dc1, contact_name:'Sarah Johnson',  contact_username:'@sarah_j'    },
-  { id:'cv2', platform:'WhatsApp',  status:'open',     last_message:"When can we schedule a demo call?",            last_message_at:ago(15),  unread_count:1, created_at:ago(2880), contact_id:'dc2', contact:DEMO_CONTACTS_MAP.dc2, contact_name:'Michael Chen',   contact_username:'+1 555-0102' },
-  { id:'cv3', platform:'LinkedIn',  status:'open',     last_message:"Interested in the enterprise plan",            last_message_at:ago(60),  unread_count:0, created_at:ago(4320), contact_id:'dc3', contact:DEMO_CONTACTS_MAP.dc3, contact_name:'Emma Williams',  contact_username:'@emmawilliams'},
-  { id:'cv4', platform:'Facebook',  status:'resolved', last_message:"Thanks so much for your help!",               last_message_at:ago(180), unread_count:0, created_at:ago(5760), contact_id:'dc4', contact:DEMO_CONTACTS_MAP.dc4, contact_name:'James Brown',    contact_username:'@jbrown_net' },
-  { id:'cv5', platform:'Instagram', status:'open',     last_message:"Do you have a free trial available?",          last_message_at:ago(240), unread_count:3, created_at:ago(7200), contact_id:'dc5', contact:DEMO_CONTACTS_MAP.dc5, contact_name:'Priya Patel',    contact_username:'@priya_growth'},
-  { id:'cv6', platform:'LinkedIn',  status:'resolved', last_message:"Great, see you at the webinar!",               last_message_at:ago(360), unread_count:0, created_at:ago(8640), contact_id:'dc6', contact:DEMO_CONTACTS_MAP.dc6, contact_name:'Cameron Wilson', contact_username:'@cameron_w'  },
-];
-
-const DEMO_MESSAGES: Record<string, Message[]> = {
-  cv1:[
-    { id:'m1', conversation_id:'cv1', content:"Hey! I just saw your analytics dashboard post 😍",                                                              direction:'inbound',  read_at:ago(12), created_at:ago(14) },
-    { id:'m2', conversation_id:'cv1', content:"The reach metrics look incredible. How does BrandFlow pull all that data?",                                     direction:'inbound',  read_at:ago(8),  created_at:ago(10) },
-    { id:'m3', conversation_id:'cv1', content:"Hi Sarah! Thanks so much 🙌 BrandFlow pulls from each platform's API and aggregates everything in one place.", direction:'outbound', read_at:ago(5),  created_at:ago(6)  },
-    { id:'m4', conversation_id:'cv1', content:"We also have AI insights that analyze trends and suggest your best posting times!",                              direction:'outbound', read_at:ago(5),  created_at:ago(5)  },
-    { id:'m5', conversation_id:'cv1', content:"Loved your analytics post! Can we chat?",                                                                       direction:'inbound',  read_at:null,    created_at:ago(2)  },
-  ],
-  cv2:[
-    { id:'m6', conversation_id:'cv2', content:"Hi, I found BrandFlow through a LinkedIn post",                                                                 direction:'inbound',  read_at:ago(30), created_at:ago(60) },
-    { id:'m7', conversation_id:'cv2', content:"We're a 20-person startup and need better social media management",                                             direction:'inbound',  read_at:ago(25), created_at:ago(55) },
-    { id:'m8', conversation_id:'cv2', content:"Great to hear from you, Michael! We'd love to show you how BrandFlow can help your team 🚀",                   direction:'outbound', read_at:ago(20), created_at:ago(25) },
-    { id:'m9', conversation_id:'cv2', content:"When can we schedule a demo call?",                                                                             direction:'inbound',  read_at:null,    created_at:ago(15) },
-  ],
-  cv3:[
-    { id:'m10', conversation_id:'cv3', content:"I saw your pricing page — what's included in the enterprise plan?",                                            direction:'inbound',  read_at:ago(90), created_at:ago(120) },
-    { id:'m11', conversation_id:'cv3', content:"Enterprise includes unlimited posts, 10 team seats, white-label reports, and priority support!",               direction:'outbound', read_at:ago(80), created_at:ago(80)  },
-    { id:'m12', conversation_id:'cv3', content:"Interested in the enterprise plan",                                                                            direction:'inbound',  read_at:ago(65), created_at:ago(60)  },
-  ],
-  cv4:[
-    { id:'m13', conversation_id:'cv4', content:"I had an issue with the Instagram connection",                                                                 direction:'inbound',  read_at:ago(500), created_at:ago(720) },
-    { id:'m14', conversation_id:'cv4', content:"Let me look into that for you right away!",                                                                   direction:'outbound', read_at:ago(490), created_at:ago(500) },
-    { id:'m15', conversation_id:'cv4', content:"Fixed! Please try reconnecting your Instagram account in Settings → Integrations.",                           direction:'outbound', read_at:ago(480), created_at:ago(240) },
-    { id:'m16', conversation_id:'cv4', content:"Thanks so much for your help!",                                                                               direction:'inbound',  read_at:ago(185), created_at:ago(180) },
-  ],
-  cv5:[
-    { id:'m17', conversation_id:'cv5', content:"Saw your ad! Love the concept 🔥",                                                                            direction:'inbound',  read_at:ago(600), created_at:ago(600) },
-    { id:'m18', conversation_id:'cv5', content:"We have a 14-day free trial with full access to all Pro features!",                                            direction:'outbound', read_at:ago(590), created_at:ago(590) },
-    { id:'m19', conversation_id:'cv5', content:"Do you have a free trial available?",                                                                          direction:'inbound',  read_at:null,     created_at:ago(240) },
-  ],
-  cv6:[
-    { id:'m20', conversation_id:'cv6', content:"I registered for your upcoming webinar",                                                                       direction:'inbound',  read_at:ago(720), created_at:ago(720) },
-    { id:'m21', conversation_id:'cv6', content:"Wonderful! We'll see you there. It starts at 2 PM EST 👋",                                                    direction:'outbound', read_at:ago(370), created_at:ago(370) },
-    { id:'m22', conversation_id:'cv6', content:"Great, see you at the webinar!",                                                                               direction:'inbound',  read_at:ago(365), created_at:ago(360) },
-  ],
-};
+// ── No demo data ───────────────────────────────────────────────────────────────
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -414,9 +356,9 @@ export default function ConversationsPage() {
       const res = await fetch(`/api/conversations?${p}`);
       if (!res.ok) throw new Error('failed');
       const json = await res.json();
-      setConversations(json.conversations?.length ? json.conversations : DEMO_CONVERSATIONS);
+      setConversations(json.conversations ?? []);
     } catch {
-      setConversations(DEMO_CONVERSATIONS);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -438,8 +380,8 @@ export default function ConversationsPage() {
 
     fetch(`/api/conversations/${selected.id}/messages`)
       .then(r => r.ok ? r.json() : Promise.reject())
-      .then(j => setMessages(j.messages?.length ? j.messages : (DEMO_MESSAGES[selected.id] ?? [])))
-      .catch(() => setMessages(DEMO_MESSAGES[selected.id] ?? []))
+      .then(j => setMessages(j.messages ?? []))
+      .catch(() => setMessages([]))
       .finally(() => setMsgLoading(false));
   }, [selected?.id]);
 
@@ -674,8 +616,9 @@ export default function ConversationsPage() {
             ))
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <MessageSquare size={32} color="#d1d5db" style={{ margin: '0 auto 10px' }} />
-              <p style={{ fontSize: 13, color: '#9ca3af' }}>No conversations</p>
+              <MessageSquare size={32} color="#d1d5db" style={{ margin: '0 auto 10px', display: 'block' }} />
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>No conversations yet</p>
+              <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>Connect your social accounts to start receiving messages</p>
             </div>
           ) : (
             filtered.map(conv => {

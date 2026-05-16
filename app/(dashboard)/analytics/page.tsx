@@ -31,64 +31,9 @@ interface Snapshot {
   followers: number;
 }
 
-// ── Demo data ─────────────────────────────────────────────────────────────────
+// No demo data — analytics load from Supabase via /api/social/posts
 
-const DEMO_ENGAGEMENT = [
-  { day: 'Mon', ig: 4200, fb: 2100, tt: 3400, li: 1200 },
-  { day: 'Tue', ig: 5800, fb: 2400, tt: 4200, li: 1800 },
-  { day: 'Wed', ig: 4900, fb: 2900, tt: 3900, li: 2100 },
-  { day: 'Thu', ig: 6800, fb: 3200, tt: 5100, li: 2400 },
-  { day: 'Fri', ig: 7200, fb: 3800, tt: 6200, li: 2900 },
-  { day: 'Sat', ig: 9100, fb: 4100, tt: 7800, li: 1900 },
-  { day: 'Sun', ig: 8400, fb: 3700, tt: 7100, li: 1600 },
-];
-
-const DEMO_REACH = [
-  { month: 'Jan', reach: 1.2 }, { month: 'Feb', reach: 1.5 },
-  { month: 'Mar', reach: 1.3 }, { month: 'Apr', reach: 1.9 },
-  { month: 'May', reach: 2.1 }, { month: 'Jun', reach: 2.4 },
-];
-
-const PIE_TRAFFIC = [
-  { name: 'Instagram', value: 42, color: '#e1306c' },
-  { name: 'TikTok',    value: 28, color: '#555'    },
-  { name: 'Facebook',  value: 18, color: '#1877f2' },
-  { name: 'LinkedIn',  value: 12, color: '#0077b5' },
-];
-
-const PIE_GENDER = [
-  { name: 'Female', value: 58, color: '#a855f7' },
-  { name: 'Male',   value: 38, color: '#3b82f6' },
-  { name: 'Other',  value: 4,  color: '#94a3b8' },
-];
-
-const DEMO_AGE = [
-  { group: '18-24', pct: 24 },
-  { group: '25-34', pct: 38 },
-  { group: '35-44', pct: 22 },
-  { group: '45-54', pct: 11 },
-  { group: '55+',   pct:  5 },
-];
-
-const DEMO_POSTS = [
-  { id: '1', platform: 'instagram', content: 'Summer collection launch 🌟 Shop now and get 20% off your first order!', date: '2024-06-12', reach: 72000,  engagement: 6100, clicks: 2300, ctr: 3.2, img: 'https://picsum.photos/48/48?random=10' },
-  { id: '2', platform: 'tiktok',    content: 'Behind the scenes of our campaign shoot — watch till the end! 🎬',         date: '2024-06-10', reach: 54000,  engagement: 8900, clicks: 1800, ctr: 3.3, img: 'https://picsum.photos/48/48?random=11' },
-  { id: '3', platform: 'linkedin',  content: 'Top 5 growth strategies for B2B brands in 2024. Thread →',                date: '2024-06-09', reach: 31000,  engagement: 2400, clicks: 1200, ctr: 3.9, img: 'https://picsum.photos/48/48?random=12' },
-  { id: '4', platform: 'instagram', content: 'Weekly poll: which product do you want to see next? 🗳️',                   date: '2024-06-08', reach: 67000,  engagement: 5900, clicks: 2100, ctr: 3.1, img: 'https://picsum.photos/48/48?random=13' },
-  { id: '5', platform: 'facebook',  content: '7 hacks to boost your social media engagement today.',                      date: '2024-06-07', reach: 28000,  engagement: 1900, clicks:  950, ctr: 3.4, img: 'https://picsum.photos/48/48?random=14' },
-  { id: '6', platform: 'tiktok',    content: 'POV: Your morning routine optimized for productivity ☕',                   date: '2024-06-05', reach: 91000,  engagement: 12400, clicks: 3200, ctr: 3.5, img: 'https://picsum.photos/48/48?random=15' },
-  { id: '7', platform: 'instagram', content: 'New arrivals are here! 25 fresh styles added to the store.',               date: '2024-06-03', reach: 55000,  engagement: 4700, clicks: 1650, ctr: 3.0, img: 'https://picsum.photos/48/48?random=16' },
-  { id: '8', platform: 'linkedin',  content: 'Lessons learned from scaling from 0 to 50K followers in 6 months.',        date: '2024-06-01', reach: 42000,  engagement: 3800, clicks: 1900, ctr: 4.5, img: 'https://picsum.photos/48/48?random=17' },
-  { id: '9', platform: 'facebook',  content: 'Customer spotlight: How Jane grew her brand with BrandFlow.',              date: '2024-05-30', reach: 19000,  engagement: 1400, clicks:  720, ctr: 3.8, img: 'https://picsum.photos/48/48?random=18' },
-  { id: '10', platform: 'instagram', content: 'Throwback to our first product shoot 📸 How far we\'ve come!',           date: '2024-05-28', reach: 48000,  engagement: 5200, clicks: 1400, ctr: 2.9, img: 'https://picsum.photos/48/48?random=19' },
-];
-
-const DEMO_STATS = { reach: 2400000, engagement: 128000, impressions: 5600000, ctr: 3.4 };
-
-const SPARKLINE_REACH      = [1.2,1.5,1.3,1.9,2.1,2.4].map((v,i) => ({ v: v * 1e6, i }));
-const SPARKLINE_ENGAGEMENT = [82,94,88,110,121,128].map((v,i)      => ({ v: v * 1000, i }));
-const SPARKLINE_IMPRESSIONS = [3.1,3.8,3.4,4.5,5.0,5.6].map((v,i) => ({ v: v * 1e6, i }));
-const SPARKLINE_CTR        = [2.8,3.1,2.9,3.3,3.5,3.4].map((v,i)  => ({ v, i }));
+type PostRow = { id: string; platform: string; content: string; date: string; reach: number; engagement: number; clicks: number; ctr: number; img?: string };
 
 const PLATFORMS_META = [
   { key: 'instagram', label: 'Instagram', color: '#e1306c', barKey: 'ig', Icon: InstagramIcon },
@@ -109,7 +54,7 @@ function fmtK(v: number): string {
   return v >= 1000 ? (v / 1000).toFixed(0) + 'K' : String(v);
 }
 
-function exportCSV(posts: typeof DEMO_POSTS) {
+function exportCSV(posts: PostRow[]) {
   const header = ['Platform','Content','Date','Reach','Engagement','Clicks','CTR'].join(',');
   const rows = posts.map(p =>
     [p.platform, `"${p.content.replace(/"/g,'""')}"`, p.date, p.reach, p.engagement, p.clicks, p.ctr + '%'].join(',')
@@ -267,12 +212,7 @@ const INSIGHT_TYPE_META: Record<InsightType, { label: string; color: string; bg:
   campaign:    { label: 'Campaign',    color: '#f59e0b', bg: '#fffbeb', emoji: '🚀' },
 };
 
-const DEMO_AI_INSIGHTS: AIInsight[] = [
-  { id:'ai1', title:'Instagram Reels driving 3× more reach', description:'Your Reels outperform static posts by 3.2×. Increasing frequency to 5/week could add ~35K reach.',          insight_type:'content',     action_url:'Increase Reels from 3 to 5 per week',                                is_read:false, created_at:new Date(Date.now()-2*3600000).toISOString() },
-  { id:'ai2', title:'6–8 PM weekday posts get 3× engagement', description:'Weekday evening posts consistently outperform other time slots across all platforms.',                           insight_type:'performance', action_url:'Schedule high-priority posts between 6–8 PM weekdays',               is_read:false, created_at:new Date(Date.now()-5*3600000).toISOString() },
-  { id:'ai3', title:'25–34 age group growing fastest (+28%)',  description:'This segment now represents 38% of your audience. Tailor content to career growth and entrepreneurship.',     insight_type:'audience',    action_url:'Create content for 25–34 audience (career, productivity, growth)',   is_read:true,  created_at:new Date(Date.now()-24*3600000).toISOString() },
-  { id:'ai4', title:'LinkedIn B2B content ROI exceeds target', description:'LinkedIn posts generate 4.5% CTR — 18% above your average. Increase B2B thought leadership content.',         insight_type:'campaign',    action_url:'Publish 3 LinkedIn thought-leadership articles this week',            is_read:true,  created_at:new Date(Date.now()-48*3600000).toISOString() },
-];
+// AI insights start empty and are fetched/generated on demand
 
 function InsightsTab({ insights, onGenerate, onMarkRead, generating }: {
   insights: AIInsight[];
@@ -439,9 +379,9 @@ export default function AnalyticsPage() {
       const res = await fetch('/api/ai/insights');
       if (!res.ok) throw new Error();
       const json = await res.json();
-      setInsights(json.insights?.length ? json.insights : DEMO_AI_INSIGHTS);
+      setInsights(json.insights ?? []);
     } catch {
-      setInsights(DEMO_AI_INSIGHTS);
+      setInsights([]);
     }
   }, []);
 
@@ -488,24 +428,11 @@ export default function AnalyticsPage() {
     }).catch(() => {});
   }
 
-  // Filter engagement data by platform
-  const engData = useMemo(() => {
-    if (platform === 'all') return DEMO_ENGAGEMENT;
-    const key = platform === 'instagram' ? 'ig' : platform === 'facebook' ? 'fb' : platform === 'tiktok' ? 'tt' : platform === 'linkedin' ? 'li' : null;
-    if (!key) return DEMO_ENGAGEMENT;
-    return DEMO_ENGAGEMENT.map(d => ({ day: d.day, [key]: (d as unknown as Record<string,number>)[key] }));
-  }, [platform]);
+  // Engagement chart data — empty until real data is connected
+  const engData: { day: string; ig?: number; fb?: number; tt?: number; li?: number }[] = [];
 
-  // Filter posts table
-  const filteredPosts = useMemo(() => {
-    let p = platform === 'all' ? DEMO_POSTS : DEMO_POSTS.filter(post => post.platform === platform);
-    p = [...p].sort((a, b) => {
-      const va = (a as Record<string,unknown>)[sortCol] as number;
-      const vb = (b as Record<string,unknown>)[sortCol] as number;
-      return sortDir === 'asc' ? va - vb : vb - va;
-    });
-    return p;
-  }, [platform, sortCol, sortDir]);
+  // Posts table — empty until real data is connected
+  const filteredPosts: PostRow[] = [];
 
   const totalPages  = Math.ceil(filteredPosts.length / PER_PAGE);
   const pagedPosts  = filteredPosts.slice((page - 1) * PER_PAGE, page * PER_PAGE);
@@ -566,35 +493,22 @@ export default function AnalyticsPage() {
         {/* ── Top Stats ──────────────────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
           {[
-            { label: 'Total Reach',       value: fmtNum(DEMO_STATS.reach),       change: '+18%', color: '#7c3aed', icon: Eye,              spark: SPARKLINE_REACH      },
-            { label: 'Total Engagement',  value: fmtNum(DEMO_STATS.engagement),  change: '+24%', color: '#0ea5e9', icon: Activity,         spark: SPARKLINE_ENGAGEMENT },
-            { label: 'Total Impressions', value: fmtNum(DEMO_STATS.impressions), change: '+12%', color: '#10b981', icon: TrendingUp,        spark: SPARKLINE_IMPRESSIONS },
-            { label: 'Avg CTR',           value: DEMO_STATS.ctr + '%',           change: '+0.6%',color: '#f59e0b', icon: MousePointerClick, spark: SPARKLINE_CTR        },
+            { label: 'Total Reach',       color: '#7c3aed', icon: Eye              },
+            { label: 'Total Engagement',  color: '#0ea5e9', icon: Activity         },
+            { label: 'Total Impressions', color: '#10b981', icon: TrendingUp        },
+            { label: 'Avg CTR',           color: '#f59e0b', icon: MousePointerClick },
           ].map(s => (
             <div key={s.label} style={{ background: '#fff', borderRadius: 16, padding: '16px 18px', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', border: '1px solid #f1f0ff' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>{s.label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{s.value}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>—</div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: s.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <s.icon size={18} color={s.color} />
-                  </div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '2px 7px', borderRadius: 20 }}>{s.change}</span>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: s.color + '15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <s.icon size={18} color={s.color} />
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={40}>
-                <AreaChart data={s.spark} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id={`sg-${s.label}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={s.color} stopOpacity={0.2} />
-                      <stop offset="100%" stopColor={s.color} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <Area type="monotone" dataKey="v" stroke={s.color} strokeWidth={2} fill={`url(#sg-${s.label})`} dot={false} />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div style={{ fontSize: 11, color: '#94a3b8' }}>Connect social accounts to see data</div>
             </div>
           ))}
         </div>
@@ -668,30 +582,10 @@ export default function AnalyticsPage() {
             <span style={{ fontSize: 12, color: '#7c3aed', fontWeight: 700, background: '#f5f3ff', padding: '4px 12px', borderRadius: 20 }}>↑ 24% vs last period</span>
           </div>
           {loading ? <Skeleton h={240} /> : (
-            <>
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={engData} barSize={10} barGap={3} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={fmtK} />
-                  <Tooltip content={<ChartTooltip />} cursor={{ fill: '#f8f7ff' }} />
-                  {(platform === 'all' || platform === 'instagram') && <Bar dataKey="ig" name="Instagram" fill="#e1306c" radius={[4,4,0,0]} />}
-                  {(platform === 'all' || platform === 'facebook')  && <Bar dataKey="fb" name="Facebook"  fill="#1877f2" radius={[4,4,0,0]} />}
-                  {(platform === 'all' || platform === 'tiktok')    && <Bar dataKey="tt" name="TikTok"    fill="#555"    radius={[4,4,0,0]} />}
-                  {(platform === 'all' || platform === 'linkedin')  && <Bar dataKey="li" name="LinkedIn"  fill="#0077b5" radius={[4,4,0,0]} />}
-                </BarChart>
-              </ResponsiveContainer>
-              <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
-                {PLATFORMS_META.map(p => (
-                  (platform === 'all' || platform === p.key) && (
-                    <div key={p.key} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748b' }}>
-                      <div style={{ width: 10, height: 10, borderRadius: 3, background: p.color }} />
-                      {p.label}
-                    </div>
-                  )
-                ))}
-              </div>
-            </>
+            <div style={{ height: 240, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fafaf9', borderRadius: 10 }}>
+              <Activity size={36} color="#c4b5fd" style={{ marginBottom: 10 }} />
+              <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>Connect social accounts to see analytics</p>
+            </div>
           )}
         </div>
 
@@ -708,21 +602,10 @@ export default function AnalyticsPage() {
               <span style={{ fontSize: 12, color: '#7c3aed', fontWeight: 700, background: '#f5f3ff', padding: '4px 12px', borderRadius: 20 }}>+18% vs last period</span>
             </div>
             {loading ? <Skeleton h={200} /> : (
-              <ResponsiveContainer width="100%" height={200}>
-                <AreaChart data={DEMO_REACH} margin={{ top: 5, right: 10, bottom: 0, left: 0 }}>
-                  <defs>
-                    <linearGradient id="reachAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#7c3aed" stopOpacity={0}   />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v + 'M'} />
-                  <Tooltip formatter={(v) => [v + 'M', 'Reach']} contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: 12 }} />
-                  <Area type="monotone" dataKey="reach" stroke="#7c3aed" strokeWidth={2.5} fill="url(#reachAreaGrad)" dot={{ fill: '#7c3aed', r: 4, strokeWidth: 0 }} />
-                </AreaChart>
-              </ResponsiveContainer>
+              <div style={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fafaf9', borderRadius: 10 }}>
+                <TrendingUp size={32} color="#c4b5fd" style={{ marginBottom: 10 }} />
+                <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>Connect social accounts to see analytics</p>
+              </div>
             )}
           </div>
 
@@ -731,27 +614,11 @@ export default function AnalyticsPage() {
             <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>Traffic Sources</h3>
             <p style={{ margin: '0 0 16px', fontSize: 12, color: '#94a3b8' }}>Platform distribution</p>
             {loading ? <Skeleton h={180} br={100} /> : (
-              <ResponsiveContainer width="100%" height={170}>
-                <PieChart>
-                  <Pie data={PIE_TRAFFIC} cx="50%" cy="50%" innerRadius={52} outerRadius={78} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                    {PIE_TRAFFIC.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                  <Tooltip formatter={(v) => [v + '%', 'Share']} contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ height: 170, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fafaf9', borderRadius: 10 }}>
+                <Eye size={28} color="#c4b5fd" style={{ marginBottom: 8 }} />
+                <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, textAlign: 'center' }}>Connect social accounts to see analytics</p>
+              </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 4 }}>
-              {PIE_TRAFFIC.map(d => (
-                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12, color: '#475569' }}>{d.name}</span>
-                  <div style={{ width: 60, height: 5, background: '#f1f0ff', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: d.value + '%', height: '100%', background: d.color, borderRadius: 3 }} />
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#1e293b', minWidth: 30, textAlign: 'right' }}>{d.value}%</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -851,15 +718,10 @@ export default function AnalyticsPage() {
             <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>Audience by Age</h3>
             <p style={{ margin: '0 0 20px', fontSize: 12, color: '#94a3b8' }}>Age group distribution of your followers</p>
             {loading ? <Skeleton h={200} /> : (
-              <ResponsiveContainer width="100%" height={200}>
-                <HBarChart data={DEMO_AGE} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                  <XAxis type="number" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => v + '%'} />
-                  <YAxis type="category" dataKey="group" tick={{ fontSize: 12, fill: '#475569', fontWeight: 600 }} axisLine={false} tickLine={false} width={44} />
-                  <Tooltip formatter={(v) => [v + '%', 'Audience']} contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: 12 }} cursor={{ fill: '#f8f7ff' }} />
-                  <HBar dataKey="pct" radius={[0,6,6,0]} fill="#7c3aed" background={{ fill: '#f5f3ff', radius: 6 }} />
-                </HBarChart>
-              </ResponsiveContainer>
+              <div style={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fafaf9', borderRadius: 10 }}>
+                <Activity size={30} color="#c4b5fd" style={{ marginBottom: 10 }} />
+                <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>Connect social accounts to see analytics</p>
+              </div>
             )}
           </div>
 
@@ -868,27 +730,11 @@ export default function AnalyticsPage() {
             <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>Gender Split</h3>
             <p style={{ margin: '0 0 8px', fontSize: 12, color: '#94a3b8' }}>Follower gender breakdown</p>
             {loading ? <Skeleton h={160} br={100} /> : (
-              <ResponsiveContainer width="100%" height={160}>
-                <PieChart>
-                  <Pie data={PIE_GENDER} cx="50%" cy="50%" innerRadius={46} outerRadius={70} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                    {PIE_GENDER.map((e, i) => <Cell key={i} fill={e.color} />)}
-                  </Pie>
-                  <Tooltip formatter={(v) => [v + '%', 'Share']} contentStyle={{ borderRadius: 10, border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.15)', fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
+              <div style={{ height: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fafaf9', borderRadius: 10 }}>
+                <Eye size={28} color="#c4b5fd" style={{ marginBottom: 8 }} />
+                <p style={{ fontSize: 12, color: '#94a3b8', margin: 0, textAlign: 'center' }}>Connect social accounts to see analytics</p>
+              </div>
             )}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
-              {PIE_GENDER.map(d => (
-                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                  <span style={{ flex: 1, fontSize: 12, color: '#475569' }}>{d.name}</span>
-                  <div style={{ width: 50, height: 5, background: '#f1f0ff', borderRadius: 3, overflow: 'hidden' }}>
-                    <div style={{ width: d.value + '%', height: '100%', background: d.color, borderRadius: 3 }} />
-                  </div>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: '#1e293b', minWidth: 30, textAlign: 'right' }}>{d.value}%</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 

@@ -13,44 +13,15 @@ import {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-const GROWTH_DAILY = [
-  { date: 'Apr 20', value: 24200 },
-  { date: 'Apr 27', value: 31800 },
-  { date: 'May 4',  value: 44500 },
-  { date: 'May 11', value: 57900 },
-  { date: 'May 18', value: 89700 },
-];
-const GROWTH_WEEKLY = [
-  { date: 'Wk 1', value: 24200 },
-  { date: 'Wk 2', value: 35000 },
-  { date: 'Wk 3', value: 48000 },
-  { date: 'Wk 4', value: 62000 },
-  { date: 'Wk 5', value: 89700 },
-];
-const GROWTH_MONTHLY = [
-  { date: 'Jan', value: 55000 },
-  { date: 'Feb', value: 63000 },
-  { date: 'Mar', value: 70000 },
-  { date: 'Apr', value: 79000 },
-  { date: 'May', value: 89700 },
-];
+// Empty data — will be populated with real data from social platforms
+const GROWTH_DAILY:   { date: string; value: number }[] = [];
+const GROWTH_WEEKLY:  { date: string; value: number }[] = [];
+const GROWTH_MONTHLY: { date: string; value: number }[] = [];
 
-const GEO_DATA = [
-  { country: 'United States',  value: '28.6K', pct: '32%', dot: '#7c3aed' },
-  { country: 'United Kingdom', value: '16.1K', pct: '18%', dot: '#a78bfa' },
-  { country: 'India',          value: '12.5K', pct: '14%', dot: '#22c55e' },
-  { country: 'Canada',         value: '6.2K',  pct: '7%',  dot: '#f59e0b' },
-  { country: 'Australia',      value: '4.8K',  pct: '5%',  dot: '#f87171' },
-  { country: 'Other Countries',value: '21.5K', pct: '24%', dot: '#cbd5e1' },
-];
+const GEO_DATA: { country: string; value: string; pct: string; dot: string }[] = [];
 
-const TOP_CONTENT = [
-  { platform: 'instagram', type: 'Reel',     title: 'Sunset vibes and good energy ✨',      date: 'May 16, 2024', reach: '128.4K', engagement: '12.4K', er: '9.7%',  likes: '12.4K', bg: '#1e1b3a' },
-  { platform: 'tiktok',    type: 'Video',    title: 'Behind the scenes of our process',     date: 'May 15, 2024', reach: '87.3K',  engagement: '8.7K',  er: '10.0%', likes: '8.7K',  bg: '#0f172a' },
-  { platform: 'instagram', type: 'Carousel', title: 'Top 5 productivity tips for creators', date: 'May 14, 2024', reach: '72.6K',  engagement: '6.1K',  er: '8.4%',  likes: '6.1K',  bg: '#1e3a5f' },
-  { platform: 'linkedin',  type: 'Article',  title: 'The future of remote work in 2024',   date: 'May 13, 2024', reach: '64.2K',  engagement: '5.8K',  er: '9.0%',  likes: '5.8K',  bg: '#0a2540' },
-  { platform: 'facebook',  type: 'Post',     title: 'Our new product is live! 🚀',          date: 'May 12, 2024', reach: '52.1K',  engagement: '4.3K',  er: '8.2%',  likes: '4.3K',  bg: '#1a1a2e' },
-];
+type ContentItem = { platform: string; type: string; title: string; date: string; reach: string; engagement: string; er: string; likes: string; bg: string };
+const TOP_CONTENT: ContentItem[] = [];
 
 const PLATFORM_TABS = [
   { key: 'all',       label: 'All Content' },
@@ -255,40 +226,43 @@ export default function AudiencePage() {
 
         {/* 4 Stat cards */}
         <div style={{ display: 'flex', gap: 12 }}>
-          <StatCard icon={<Users  size={17} color="#7c3aed" />} label="Total Audience"   value="89.7K" change="21%" iconBg="rgba(124,58,237,0.1)"  iconColor="#7c3aed" />
-          <StatCard icon={<TrendingUp size={17} color="#10b981" />} label="New Audience" value="12.4K" change="18%" iconBg="rgba(16,185,129,0.1)"  iconColor="#10b981" />
-          <StatCard icon={<Zap    size={17} color="#f59e0b" />} label="Engagement Rate" value="4.8%"  change="12%" iconBg="rgba(245,158,11,0.1)"  iconColor="#f59e0b" />
-          <StatCard icon={<Star   size={17} color="#f87171" />} label="Loyal Followers"  value="34.2K" change="15%" iconBg="rgba(248,113,113,0.1)" iconColor="#f87171" />
+          <StatCard icon={<Users      size={17} color="#7c3aed" />} label="Total Audience"   value="—" change="—" iconBg="rgba(124,58,237,0.1)"  iconColor="#7c3aed" />
+          <StatCard icon={<TrendingUp size={17} color="#10b981" />} label="New Audience"     value="—" change="—" iconBg="rgba(16,185,129,0.1)"  iconColor="#10b981" />
+          <StatCard icon={<Zap        size={17} color="#f59e0b" />} label="Engagement Rate"  value="—" change="—" iconBg="rgba(245,158,11,0.1)"  iconColor="#f59e0b" />
+          <StatCard icon={<Star       size={17} color="#f87171" />} label="Loyal Followers"  value="—" change="—" iconBg="rgba(248,113,113,0.1)" iconColor="#f87171" />
         </div>
 
         {/* Geography card */}
         <div style={{ background: '#fff', borderRadius: 16, padding: '20px 20px', border: '1px solid #f1f0ff', boxShadow: '0 1px 4px rgba(124,58,237,0.05)' }}>
           <h2 style={{ margin: '0 0 14px', fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Audience by Geography</h2>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-            {/* Map */}
-            <div style={{ flex: '0 0 55%' }}>
-              <WorldMap />
+          {GEO_DATA.length === 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', background: '#fafaf9', borderRadius: 10 }}>
+              <Users size={32} color="#c4b5fd" style={{ marginBottom: 10 }} />
+              <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, textAlign: 'center' }}>Connect social accounts to see analytics</p>
             </div>
-            {/* Country table */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Country</span>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Audience</span>
-              </div>
-              {GEO_DATA.map(row => (
-                <div key={row.country} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderTop: '1px solid #f8f7ff' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: row.dot, flexShrink: 0 }} />
-                    <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>{row.country}</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{row.value}</span>
-                    <span style={{ fontSize: 11, color: '#94a3b8', width: 32, textAlign: 'right' }}>{row.pct}</span>
-                  </div>
+          ) : (
+            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+              <div style={{ flex: '0 0 55%' }}><WorldMap /></div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Country</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Audience</span>
                 </div>
-              ))}
+                {GEO_DATA.map(row => (
+                  <div key={row.country} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 0', borderTop: '1px solid #f8f7ff' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: row.dot, flexShrink: 0 }} />
+                      <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>{row.country}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{row.value}</span>
+                      <span style={{ fontSize: 11, color: '#94a3b8', width: 32, textAlign: 'right' }}>{row.pct}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Growth chart card */}

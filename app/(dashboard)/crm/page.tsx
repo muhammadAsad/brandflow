@@ -53,22 +53,7 @@ const STATUS_META: Record<ContactStatus, { label: string; color: string; bg: str
 const AVATAR_COLORS = ['#7c3aed','#0ea5e9','#059669','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6'];
 const SOURCE_OPTIONS = ['Manual', 'Instagram', 'LinkedIn', 'Website', 'Referral', 'Cold Email', 'Event'];
 
-const DEMO_CONTACTS: Contact[] = [
-  { id:'d1', name:'Sarah Johnson',    email:'sarah@techcorp.com',   phone:'+1 555-0101', company:'TechCorp',      job_title:'Head of Marketing', status:'customer', source:'LinkedIn',   tags:['VIP','Enterprise'],   notes:'Interested in premium plan. Met at SaaStr 2024.',          linkedin:'sarahjohnson',   instagram:'sarah_j',      twitter:'sarahjohnson',  created_at:'2024-01-15T10:00:00Z', last_activity_at:'2024-05-10T14:30:00Z' },
-  { id:'d2', name:'Michael Chen',     email:'mchen@startup.io',     phone:'+1 555-0102', company:'StartupIO',     job_title:'CEO',               status:'prospect', source:'Instagram',  tags:['Warm Lead'],          notes:'Replied to IG story. Follow up next week.',                linkedin:'michaelchen',    instagram:'mchen_io',     twitter:'mchen',         created_at:'2024-02-20T09:00:00Z', last_activity_at:'2024-05-08T11:00:00Z' },
-  { id:'d3', name:'Emma Williams',    email:'emma@designco.com',    phone:'+1 555-0103', company:'DesignCo',      job_title:'Creative Director', status:'lead',     source:'Website',    tags:['Design','Agency'],    notes:'Downloaded whitepaper. Opened 3 emails.',                  linkedin:'emmawilliams',   instagram:'emma_design',  twitter:'emmawilliams',  created_at:'2024-03-05T08:00:00Z', last_activity_at:'2024-05-07T16:45:00Z' },
-  { id:'d4', name:'James Brown',      email:'jbrown@agency.net',    phone:'+1 555-0104', company:'Agency Net',    job_title:'Partner',           status:'customer', source:'Referral',   tags:['Pro Plan','Agency'],  notes:'Referred by Sarah Johnson. Uses for 3 clients.',           linkedin:'jamesbrown',     instagram:'jbrown_net',   twitter:'jbrown',        created_at:'2024-01-28T11:00:00Z', last_activity_at:'2024-05-11T09:20:00Z' },
-  { id:'d5', name:'Priya Patel',      email:'priya@growthlab.co',   phone:'+1 555-0105', company:'GrowthLab',     job_title:'Growth Manager',    status:'prospect', source:'LinkedIn',   tags:['B2B','Growth'],       notes:'Engaged with LinkedIn post. Scheduled demo for Friday.',   linkedin:'priyapatel',     instagram:'priya_growth', twitter:'priyapatel',    created_at:'2024-04-01T13:00:00Z', last_activity_at:'2024-05-09T10:15:00Z' },
-  { id:'d6', name:'Carlos Mendez',    email:'carlos@brandboost.mx', phone:'+1 555-0106', company:'BrandBoost',    job_title:'Founder',           status:'churned',  source:'Cold Email', tags:['Churned','SMB'],      notes:'Cancelled after 3 months. Budget constraints.',            linkedin:'carlosmendez',   instagram:'carlosm_bb',   twitter:'carlosmendez',  created_at:'2023-11-10T08:30:00Z', last_activity_at:'2024-02-28T17:00:00Z' },
-  { id:'d7', name:'Aisha Thompson',   email:'aisha@socialwave.co',  phone:'+1 555-0107', company:'SocialWave',    job_title:'Social Media Mgr',  status:'lead',     source:'Instagram',  tags:['New','SMM'],          notes:'Commented on ad. Sent intro DM.',                          linkedin:'aishathompson',  instagram:'aisha_sw',     twitter:'aishathompson', created_at:'2024-05-01T10:00:00Z', last_activity_at:'2024-05-11T08:00:00Z' },
-  { id:'d8', name:'David Park',       email:'david@mediapeak.com',  phone:'+1 555-0108', company:'MediaPeak',     job_title:'CMO',               status:'customer', source:'LinkedIn',   tags:['Enterprise','VIP'],   notes:'Long-term client. Upgraded to Enterprise plan last month.', linkedin:'davidpark',      instagram:'david_mp',     twitter:'davidpark',     created_at:'2023-10-05T09:00:00Z', last_activity_at:'2024-05-10T12:00:00Z' },
-];
-
-const DEMO_CONVERSATIONS: Record<string, { platform: string; last_msg: string; date: string }[]> = {
-  d1: [{ platform:'LinkedIn', last_msg:'Thanks for the quick response! Looking forward to the call.', date:'2024-05-10T14:30:00Z' }],
-  d2: [{ platform:'Instagram', last_msg:'Loved the post about analytics! Can we chat?', date:'2024-05-08T11:00:00Z' }],
-  d5: [{ platform:'LinkedIn', last_msg:'Would love a demo of the scheduling features.', date:'2024-05-09T10:15:00Z' }],
-};
+// No demo data — contacts load from Supabase via /api/contacts
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -579,7 +564,7 @@ function DetailPanel({ contact, onUpdate, onDelete, onClose }: DetailPanelProps)
     setNoteInput('');
   }
 
-  const conversations = DEMO_CONVERSATIONS[contact.id] ?? [];
+  const conversations: { platform: string; last_msg: string; date: string }[] = [];
 
   const activityItems = [
     { icon:'📋', text:`Added as ${STATUS_META[contact.status].label}`, date: contact.created_at },
@@ -960,9 +945,9 @@ export default function CRMPage() {
       const res = await fetch(`/api/contacts?${params}`);
       if (!res.ok) throw new Error('failed');
       const json = await res.json();
-      setContacts(json.contacts?.length ? json.contacts : DEMO_CONTACTS);
+      setContacts(json.contacts ?? []);
     } catch {
-      setContacts(DEMO_CONTACTS);
+      setContacts([]);
     } finally {
       setLoading(false);
     }
@@ -1158,9 +1143,9 @@ export default function CRMPage() {
             ))
           ) : filtered.length === 0 ? (
             <div style={{ textAlign:'center', padding:'40px 20px' }}>
-              <UserPlus size={36} color="#d1d5db" style={{ margin:'0 auto 12px' }} />
-              <p style={{ fontSize:14, fontWeight:600, color:'#374151', marginBottom:4 }}>No contacts found</p>
-              <p style={{ fontSize:13, color:'#9ca3af' }}>Try adjusting your filters or add a new contact</p>
+              <UserPlus size={36} color="#d1d5db" style={{ margin:'0 auto 12px', display:'block' }} />
+              <p style={{ fontSize:14, fontWeight:600, color:'#374151', marginBottom:4 }}>No contacts yet</p>
+              <p style={{ fontSize:13, color:'#9ca3af' }}>Contacts from your conversations will appear here</p>
             </div>
           ) : (
             filtered.map(c => {

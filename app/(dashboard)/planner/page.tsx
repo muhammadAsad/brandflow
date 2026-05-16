@@ -44,13 +44,7 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }
   failed:     { bg: '#fef2f2', color: '#ef4444', label: 'Failed'      },
 };
 
-const DEMO_POSTS: Post[] = [
-  { id: 'd1', content: 'Product showcase reel — Summer collection is live! 🌟', platforms: ['instagram'], scheduled_at: null, status: 'scheduled', media_urls: [], created_at: '' },
-  { id: 'd2', content: 'Sharing our top 5 growth tips for B2B brands this quarter.', platforms: ['linkedin'], scheduled_at: null, status: 'scheduled', media_urls: [], created_at: '' },
-  { id: 'd3', content: 'Behind the scenes of our campaign shoot 🎬', platforms: ['tiktok'], scheduled_at: null, status: 'draft', media_urls: [], created_at: '' },
-  { id: 'd4', content: 'Weekly tips carousel — 7 hacks to boost engagement fast.', platforms: ['facebook'], scheduled_at: null, status: 'published', media_urls: [], created_at: '' },
-  { id: 'd5', content: 'Weekend poll: which product do you want to see next? 🗳️', platforms: ['instagram', 'x'], scheduled_at: null, status: 'scheduled', media_urls: [], created_at: '' },
-];
+// No demo data — posts load from Supabase via /api/social/posts
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -413,9 +407,9 @@ export default function PlannerPage() {
       const res  = await fetch(`/api/social/posts?from=${from}&to=${to}`);
       if (!res.ok) throw new Error();
       const json = await res.json();
-      setPosts(json.posts?.length > 0 ? json.posts : DEMO_POSTS);
+      setPosts(json.posts ?? []);
     } catch {
-      setPosts(DEMO_POSTS);
+      setPosts([]);
     } finally {
       setLoading(false);
     }
@@ -425,7 +419,6 @@ export default function PlannerPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this post?')) return;
-    if (id.startsWith('d')) { setPosts(p => p.filter(x => x.id !== id)); return; }
     await fetch(`/api/social/posts?id=${id}`, { method: 'DELETE' });
     setPosts(p => p.filter(x => x.id !== id));
   };

@@ -16,34 +16,6 @@ import type { FC } from 'react';
 interface Stats { reach: number; engagement: number; conversions: number; }
 interface IconProps { size?: number; color?: string; }
 
-// ── Demo fallbacks ─────────────────────────────────────────────────────────────
-
-const DEMO_TASKS: Task[] = [
-  { id: '1', title: 'Schedule Instagram campaign',  due_at: new Date(Date.now() + 2*3600000).toISOString(), priority: 'urgent', completed_at: null },
-  { id: '2', title: 'Reply to 15 unread messages',  due_at: new Date(Date.now() + 4*3600000).toISOString(), priority: 'high',   completed_at: null },
-  { id: '3', title: 'Review new leads',             due_at: new Date(Date.now() + 6*3600000).toISOString(), priority: 'high',   completed_at: null },
-  { id: '4', title: 'Approve content calendar',     due_at: new Date(Date.now() + 24*3600000).toISOString(), priority: 'medium', completed_at: null },
-  { id: '5', title: 'Analyze campaign performance', due_at: new Date(Date.now() + 24*3600000).toISOString(), priority: 'medium', completed_at: null },
-];
-
-const DEMO_INSIGHTS: Insight[] = [
-  { id: '1', title: 'Your engagement is 24% higher than last week! 🎉', description: 'Best performing channel: Instagram. Your recent reels are driving exceptional reach.', insight_type: 'performance' },
-  { id: '2', title: 'Best time to post: 6–8 PM weekdays',               description: 'Posts published between 6–8 PM receive 3× more engagement based on your last 30 days.', insight_type: 'audience' },
-  { id: '3', title: 'TikTok videos under 30s get 2× completions',        description: 'Optimize your short-form content for higher completion rates and better algorithm reach.', insight_type: 'content' },
-];
-
-const DEMO_CONVS = [
-  { name: 'Jane Cooper',        msg: 'Interested in boosting our brand visibility...', time: '2m ago',  platform: 'instagram' },
-  { name: 'Brooklyn Simmons',   msg: 'Can you share more about your services?',        time: '15m ago', platform: 'facebook'  },
-  { name: 'Dianne Russell',     msg: 'Thanks! That helps a lot.',                       time: '1h ago',  platform: 'whatsapp'  },
-  { name: 'Cameron Williamson', msg: 'When can we schedule a demo call?',              time: '2h ago',  platform: 'linkedin'  },
-];
-
-const TOP_CONTENT = [
-  { img: 'https://picsum.photos/160/160?random=1', platform: 'instagram', likes: '12.4K', type: 'Reel'    },
-  { img: 'https://picsum.photos/160/160?random=2', platform: 'tiktok',    likes: '8.7K',  type: 'Video'   },
-  { img: 'https://picsum.photos/160/160?random=3', platform: 'linkedin',  likes: '6.3K',  type: 'Article' },
-];
 
 // ── Data fetch ────────────────────────────────────────────────────────────────
 
@@ -191,36 +163,36 @@ async function DashboardContent() {
   const displayStats = [
     {
       label: 'Total Reach',
-      value: stats ? fmtNum(stats.reach) : '2.4M',
-      change: '+18%',
+      value: stats && stats.reach > 0 ? fmtNum(stats.reach) : '—',
+      change: stats && stats.reach > 0 ? '+0%' : 'No data yet',
       icon: Eye,
       color: '#7c3aed',
     },
     {
       label: 'Engagement',
-      value: stats ? fmtNum(stats.engagement) : '128K',
-      change: '+24%',
+      value: stats && stats.engagement > 0 ? fmtNum(stats.engagement) : '—',
+      change: stats && stats.engagement > 0 ? '+0%' : 'No data yet',
       icon: Heart,
       color: '#0ea5e9',
     },
     {
       label: 'Conversions',
-      value: stats ? fmtNum(stats.conversions) : '3.6K',
-      change: '+16%',
+      value: stats && stats.conversions > 0 ? fmtNum(stats.conversions) : '—',
+      change: stats && stats.conversions > 0 ? '+0%' : 'No data yet',
       icon: Target,
       color: '#10b981',
     },
     {
       label: 'Revenue',
-      value: '$86.7K',
-      change: '+22%',
+      value: '—',
+      change: 'Connect Stripe',
       icon: DollarSign,
       color: '#f59e0b',
     },
   ];
 
-  const displayTasks = tasks ?? DEMO_TASKS;
-  const displayInsights = insights ?? DEMO_INSIGHTS;
+  const displayTasks = tasks ?? [];
+  const displayInsights = insights ?? [];
   const displayConvs = conversations
     ? conversations.map((c: { platform: string; last_message: string | null; last_message_at: string | null }) => ({
         name: 'Contact',
@@ -228,7 +200,7 @@ async function DashboardContent() {
         time: c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
         platform: c.platform,
       }))
-    : DEMO_CONVS;
+    : [];
 
   return (
     <>
@@ -258,7 +230,7 @@ async function DashboardContent() {
                 <div style={{ marginTop: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>Reach Trend</span>
-                    <span style={{ fontSize: 12, color: '#7c3aed', fontWeight: 700, background: '#f5f3ff', padding: '3px 10px', borderRadius: 20 }}>↑ 18% this month</span>
+                    {stats && stats.reach > 0 && <span style={{ fontSize: 12, color: '#7c3aed', fontWeight: 700, background: '#f5f3ff', padding: '3px 10px', borderRadius: 20 }}>↑ 18% this month</span>}
                   </div>
                   <ReachTrendChart />
                 </div>
@@ -284,25 +256,35 @@ async function DashboardContent() {
                 <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1e293b' }}>Recent Conversations</h3>
                 <button style={{ background: 'none', border: 'none', fontSize: 12, color: '#7c3aed', cursor: 'pointer', fontWeight: 600 }}>View all</button>
               </div>
-              {displayConvs.map((conv, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < displayConvs.length - 1 ? '1px solid #f8f7ff' : 'none' }}>
-                  <Avatar name={conv.name} size={36} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{conv.name}</div>
-                    <div style={{ fontSize: 12, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conv.msg}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{conv.time}</div>
-                    <PlatformIcon platform={conv.platform} size={14} />
-                  </div>
+              {displayConvs.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '24px 0', color: '#94a3b8' }}>
+                  <MessageCircle size={28} style={{ opacity: 0.3, marginBottom: 8 }} />
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>No conversations yet</div>
+                  <div style={{ fontSize: 11, marginTop: 4 }}>Connect your social accounts to see messages</div>
                 </div>
-              ))}
-              <div style={{ textAlign: 'center', marginTop: 14 }}>
-                <button style={{ background: '#ede9fe', color: '#7c3aed', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  <MessageCircle size={12} />
-                  12 unread conversations
-                </button>
-              </div>
+              ) : (
+                <>
+                  {displayConvs.map((conv, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: i < displayConvs.length - 1 ? '1px solid #f8f7ff' : 'none' }}>
+                      <Avatar name={conv.name} size={36} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{conv.name}</div>
+                        <div style={{ fontSize: 12, color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{conv.msg}</div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{conv.time}</div>
+                        <PlatformIcon platform={conv.platform} size={14} />
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ textAlign: 'center', marginTop: 14 }}>
+                    <button style={{ background: '#ede9fe', color: '#7c3aed', border: 'none', borderRadius: 20, padding: '7px 18px', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                      <MessageCircle size={12} />
+                      View all conversations
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Top Performing Content */}

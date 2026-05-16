@@ -13,47 +13,8 @@ import {
 } from '@/components/ui/platform-icons';
 
 // ── Data ──────────────────────────────────────────────────────────────────────
-
-const GROWTH_DATA = {
-  Daily: [
-    { date: 'Apr 20', value: 24200 },
-    { date: 'Apr 27', value: 31800 },
-    { date: 'May 4',  value: 44500 },
-    { date: 'May 11', value: 57900 },
-    { date: 'May 18', value: 89700 },
-  ],
-  Weekly: [
-    { date: 'Wk 1', value: 24200 },
-    { date: 'Wk 2', value: 38000 },
-    { date: 'Wk 3', value: 52000 },
-    { date: 'Wk 4', value: 68000 },
-    { date: 'Wk 5', value: 89700 },
-  ],
-  Monthly: [
-    { date: 'Jan', value: 55000 },
-    { date: 'Feb', value: 63000 },
-    { date: 'Mar', value: 70000 },
-    { date: 'Apr', value: 79000 },
-    { date: 'May', value: 89700 },
-  ],
-};
-
-const GEO_ROWS = [
-  { country: 'United States',   value: '28.6K', pct: '32%', w: '62%', dot: '#7c3aed' },
-  { country: 'United Kingdom',  value: '16.1K', pct: '18%', w: '38%', dot: '#0ea5e9' },
-  { country: 'India',           value: '12.5K', pct: '14%', w: '28%', dot: '#10b981' },
-  { country: 'Canada',          value: '6.2K',  pct: '7%',  w: '14%', dot: '#f59e0b' },
-  { country: 'Australia',       value: '4.8K',  pct: '5%',  w: '10%', dot: '#f87171' },
-  { country: 'Other Countries', value: '21.5K', pct: '24%', w: '48%', dot: '#cbd5e1' },
-];
-
-const TOP_CONTENT = [
-  { platform: 'instagram', type: 'Reel',     title: 'Sunset vibes and good energy ✨',      date: 'May 16, 2024', reach: '128.4K', engagement: '12.4K', er: '9.7%',  likes: '12.4K', img: 'https://picsum.photos/160/160?random=10' },
-  { platform: 'tiktok',    type: 'Video',    title: 'Behind the scenes of our process',     date: 'May 15, 2024', reach: '87.3K',  engagement: '8.7K',  er: '10.0%', likes: '8.7K',  img: 'https://picsum.photos/160/160?random=11' },
-  { platform: 'instagram', type: 'Carousel', title: 'Top 5 productivity tips for creators', date: 'May 14, 2024', reach: '72.6K',  engagement: '6.1K',  er: '8.4%',  likes: '6.1K',  img: 'https://picsum.photos/160/160?random=12' },
-  { platform: 'linkedin',  type: 'Article',  title: 'The future of remote work in 2024',   date: 'May 13, 2024', reach: '64.2K',  engagement: '5.8K',  er: '9.0%',  likes: '5.8K',  img: 'https://picsum.photos/160/160?random=13' },
-  { platform: 'facebook',  type: 'Post',     title: 'Our new product is live! 🚀',          date: 'May 12, 2024', reach: '52.1K',  engagement: '4.3K',  er: '8.2%',  likes: '4.3K',  img: 'https://picsum.photos/160/160?random=14' },
-];
+// No hardcoded demo data — real data loads from Supabase via API routes.
+// Empty arrays / null values produce clean "connect your accounts" states.
 
 const PLATFORM_TABS = [
   { key: 'all',       label: 'All Content' },
@@ -149,11 +110,17 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 
 // ── AudiencePanel ─────────────────────────────────────────────────────────────
 
-export function AudiencePanel() {
-  const [chartRange,  setChartRange]  = useState<'Daily'|'Weekly'|'Monthly'>('Daily');
-  const [showChartDd, setShowChartDd] = useState(false);
-  const chartData = GROWTH_DATA[chartRange];
+function EmptyState({ icon, title, subtitle }: { icon: React.ReactNode; title: string; subtitle: string }) {
+  return (
+    <div style={{ textAlign: 'center', padding: '32px 16px', color: '#94a3b8' }}>
+      <div style={{ marginBottom: 10, opacity: 0.35 }}>{icon}</div>
+      <div style={{ fontSize: 13, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>{title}</div>
+      <div style={{ fontSize: 12 }}>{subtitle}</div>
+    </div>
+  );
+}
 
+export function AudiencePanel() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
@@ -163,24 +130,21 @@ export function AudiencePanel() {
         <p style={{ margin: '3px 0 0', fontSize: 12, color: '#94a3b8' }}>Understand your audience growth and demographics</p>
       </div>
 
-      {/* 4 KPI cards */}
+      {/* 4 KPI cards — show dashes until real data arrives */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
         {[
-          { icon: <Users      size={16} color="#7c3aed" />, bg: 'rgba(124,58,237,0.10)',  label: 'Total Audience',  val: '89.7K', change: '+21%' },
-          { icon: <TrendingUp size={16} color="#10b981" />, bg: 'rgba(16,185,129,0.10)',  label: 'New Audience',    val: '12.4K', change: '+18%' },
-          { icon: <Zap        size={16} color="#f59e0b" />, bg: 'rgba(245,158,11,0.10)',  label: 'Engagement Rate', val: '4.8%',  change: '+12%' },
-          { icon: <Star       size={16} color="#f87171" />, bg: 'rgba(248,113,113,0.10)', label: 'Loyal Followers', val: '34.2K', change: '+15%' },
+          { icon: <Users      size={16} color="#7c3aed" />, bg: 'rgba(124,58,237,0.10)',  label: 'Total Audience'  },
+          { icon: <TrendingUp size={16} color="#10b981" />, bg: 'rgba(16,185,129,0.10)',  label: 'New Audience'    },
+          { icon: <Zap        size={16} color="#f59e0b" />, bg: 'rgba(245,158,11,0.10)',  label: 'Engagement Rate' },
+          { icon: <Star       size={16} color="#f87171" />, bg: 'rgba(248,113,113,0.10)', label: 'Loyal Followers' },
         ].map(card => (
           <div key={card.label} style={{ background: '#fff', borderRadius: 12, padding: '13px 14px', border: '1px solid #f1f0ff', boxShadow: '0 1px 4px rgba(124,58,237,0.05)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
               <div style={{ width: 30, height: 30, borderRadius: 8, background: card.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{card.icon}</div>
               <span style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, lineHeight: 1.2 }}>{card.label}</span>
             </div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>{card.val}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
-              <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>↑ {card.change}</span>
-              <span style={{ fontSize: 10, color: '#94a3b8' }}>vs last month</span>
-            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#cbd5e1', lineHeight: 1 }}>—</div>
+            <div style={{ fontSize: 10, color: '#cbd5e1', marginTop: 4 }}>Connect accounts</div>
           </div>
         ))}
       </div>
@@ -189,80 +153,33 @@ export function AudiencePanel() {
       <div style={{ background: '#fff', borderRadius: 14, padding: '16px 18px', border: '1px solid #f1f0ff', boxShadow: '0 1px 4px rgba(124,58,237,0.05)' }}>
         <h3 style={{ margin: '0 0 12px', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Audience by Geography</h3>
         <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-
-          {/* World map */}
+          {/* World map — always shown as a visual */}
           <div style={{ flex: '0 0 58%' }}>
             <GeoWorldMap />
           </div>
-
-          {/* Country table */}
+          {/* Country table empty state */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, paddingBottom: 4, borderBottom: '1px solid #f1f0ff' }}>
               <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Country</span>
               <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Audience</span>
             </div>
-            {GEO_ROWS.map(row => (
-              <div key={row.country} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '5px 0', borderBottom: '1px solid #f8f7ff' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: row.dot, flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, color: '#374151', fontWeight: 500 }}>{row.country}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{row.value}</span>
-                  <span style={{ fontSize: 11, color: '#94a3b8', minWidth: 28, textAlign: 'right' }}>{row.pct}</span>
-                </div>
-              </div>
-            ))}
+            <EmptyState
+              icon={<Users size={26} />}
+              title="No geographic data yet"
+              subtitle="Connect your social accounts to see where your audience is located"
+            />
           </div>
         </div>
       </div>
 
-      {/* Audience Growth chart */}
+      {/* Audience Growth — empty state */}
       <div style={{ background: '#fff', borderRadius: 14, padding: '16px 18px', border: '1px solid #f1f0ff', boxShadow: '0 1px 4px rgba(124,58,237,0.05)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Audience Growth</h3>
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowChartDd(o => !o)}
-              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: '#f8f7ff', border: '1.5px solid #ede9fe', borderRadius: 8, fontSize: 12, color: '#374151', fontWeight: 600, cursor: 'pointer' }}>
-              {chartRange} <ChevronDown size={12} />
-            </button>
-            {showChartDd && (
-              <div style={{ position: 'absolute', right: 0, top: 34, background: '#fff', border: '1px solid #ede9fe', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 50, minWidth: 120, overflow: 'hidden' }}>
-                {(['Daily','Weekly','Monthly'] as const).map(r => (
-                  <div key={r}
-                    onClick={() => { setChartRange(r); setShowChartDd(false); }}
-                    style={{ padding: '8px 14px', fontSize: 12, color: r === chartRange ? '#7c3aed' : '#374151', fontWeight: r === chartRange ? 700 : 400, cursor: 'pointer' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.background = '#f8f7ff'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.background = 'none'; }}>
-                    {r}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={165}>
-          <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient id="agGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#7c3aed" stopOpacity={0.18} />
-                <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f0ff" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
-            <YAxis
-              ticks={[0, 25000, 50000, 75000, 100000]}
-              tickFormatter={(v: number) => v === 0 ? '0' : `${v / 1000}K`}
-              tick={{ fontSize: 10, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#7c3aed', strokeWidth: 1, strokeDasharray: '4 4' }} />
-            <Area type="monotone" dataKey="value" stroke="#7c3aed" strokeWidth={2.5} fill="url(#agGrad)" dot={false} activeDot={{ r: 5, fill: '#7c3aed', stroke: '#fff', strokeWidth: 2 }} />
-          </AreaChart>
-        </ResponsiveContainer>
+        <h3 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#0f172a' }}>Audience Growth</h3>
+        <EmptyState
+          icon={<TrendingUp size={28} />}
+          title="No growth data yet"
+          subtitle="Your audience growth chart will appear after connecting social accounts"
+        />
       </div>
     </div>
   );
@@ -270,9 +187,13 @@ export function AudiencePanel() {
 
 // ── TopPerformingPanel ────────────────────────────────────────────────────────
 
+interface ContentItem { platform: string; type: string; title: string; date: string; reach: string; engagement: string; er: string; likes: string; img: string; }
+
 export function TopPerformingPanel() {
   const [activeTab, setActiveTab] = useState('all');
-  const filtered = activeTab === 'all' ? TOP_CONTENT : TOP_CONTENT.filter(c => c.platform === activeTab);
+  // No demo data — real content loads from API once social accounts are connected
+  const filtered: ContentItem[] = [];
+  void activeTab; // tab filtering applies once real data is wired up
 
   return (
     <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f1f0ff', boxShadow: '0 1px 4px rgba(124,58,237,0.05)', padding: '18px 18px 14px', display: 'flex', flexDirection: 'column' }}>

@@ -42,73 +42,7 @@ interface Automation {
   blocks?: FlowBlock[];
 }
 
-// ── Demo data ─────────────────────────────────────────────────────────────────
-
-const DEMO_AUTOMATIONS: Automation[] = [
-  {
-    id: 'd1',
-    name: 'Welcome New Followers',
-    description: 'Send a welcome DM to every new Instagram follower',
-    category: 'engagement',
-    is_active: true,
-    trigger_config: { platform: 'Instagram', event: 'new_follower' },
-    conditions: [],
-    actions: [{ id: 'a1', type: 'action', title: 'Send DM', config: { message: 'Hey! Thanks for following 👋 Check out our latest posts!' } }],
-    run_count: 1240,
-    last_run_at: new Date(Date.now() - 25 * 60000).toISOString(),
-    created_at: '2024-01-15T10:00:00Z',
-  },
-  {
-    id: 'd2',
-    name: 'Lead Nurture Sequence',
-    description: 'Tag and follow up when a new CRM contact is added',
-    category: 'crm',
-    is_active: true,
-    trigger_config: { event: 'new_contact' },
-    conditions: [{ id: 'c1', type: 'condition', title: 'Status is Lead', config: { field: 'status', operator: 'equals', value: 'lead' } }],
-    actions: [
-      { id: 'a2', type: 'action', title: 'Add Tag', config: { tag: 'nurture-sequence' } },
-      { id: 'a3', type: 'action', title: 'Send Email', config: { template: 'welcome_lead' } },
-    ],
-    run_count: 387,
-    last_run_at: new Date(Date.now() - 2 * 3600000).toISOString(),
-    created_at: '2024-02-20T09:00:00Z',
-  },
-  {
-    id: 'd3',
-    name: 'Re-engagement Campaign',
-    description: 'Flag contacts who have been inactive for 30 days',
-    category: 'crm',
-    is_active: false,
-    trigger_config: { event: 'contact_inactive', days: '30' },
-    conditions: [],
-    actions: [{ id: 'a4', type: 'action', title: 'Add Tag', config: { tag: 're-engagement' } }],
-    run_count: 92,
-    last_run_at: new Date(Date.now() - 7 * 86400000).toISOString(),
-    created_at: '2024-03-05T08:00:00Z',
-  },
-  {
-    id: 'd4',
-    name: 'Daily Performance Digest',
-    description: 'Get a daily summary of your social media stats',
-    category: 'notifications',
-    is_active: true,
-    trigger_config: { event: 'schedule', cron: '0 8 * * *' },
-    conditions: [],
-    actions: [{ id: 'a5', type: 'action', title: 'Send Notification', config: { type: 'email', template: 'daily_digest' } }],
-    run_count: 45,
-    last_run_at: new Date(Date.now() - 16 * 3600000).toISOString(),
-    created_at: '2024-03-20T08:00:00Z',
-  },
-];
-
-const DEMO_LOGS: RunLog[] = [
-  { id: 'l1', status: 'success', ran_at: new Date(Date.now() - 25 * 60000).toISOString(), message: 'Sent DM to @new_user123' },
-  { id: 'l2', status: 'success', ran_at: new Date(Date.now() - 90 * 60000).toISOString(), message: 'Sent DM to @cool_brand' },
-  { id: 'l3', status: 'skipped', ran_at: new Date(Date.now() - 3 * 3600000).toISOString(), message: 'Skipped — user has DMs restricted' },
-  { id: 'l4', status: 'success', ran_at: new Date(Date.now() - 5 * 3600000).toISOString(), message: 'Sent DM to @marketer_xyz' },
-  { id: 'l5', status: 'failed', ran_at: new Date(Date.now() - 8 * 3600000).toISOString(), message: 'Error: rate limit reached' },
-];
+// No demo data — automations load from Supabase via /api/automations
 
 const TEMPLATES = [
   { icon: '👋', name: 'Welcome New Followers', desc: 'Send a DM when someone follows you', category: 'engagement' },
@@ -580,12 +514,11 @@ export default function AutomationPage() {
     try {
       const res = await fetch(`/api/automations${category !== 'all' ? `?category=${category}` : ''}`);
       const json = await res.json();
-      const list = json.automations?.length ? json.automations : DEMO_AUTOMATIONS;
+      const list = json.automations ?? [];
       setAutomations(list);
       if (!selected && list.length > 0) setSelected(list[0]);
     } catch {
-      setAutomations(DEMO_AUTOMATIONS);
-      if (!selected) setSelected(DEMO_AUTOMATIONS[0]);
+      setAutomations([]);
     } finally {
       setLoading(false);
     }
@@ -971,23 +904,11 @@ export default function AutomationPage() {
               {/* Activity Log */}
               <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20 }}>
                 <h3 style={{ fontWeight: 700, fontSize: 14, color: '#111827', margin: '0 0 16px' }}>Recent Activity</h3>
-                {DEMO_LOGS.map(log => (
-                  <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #f9fafb' }}>
-                    <div style={{
-                      width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                      background: log.status === 'success' ? '#ecfdf5' : log.status === 'failed' ? '#fef2f2' : '#fffbeb',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      {log.status === 'success' ? <Check size={12} color="#059669" /> :
-                       log.status === 'failed' ? <X size={12} color="#dc2626" /> :
-                       <AlertCircle size={12} color="#d97706" />}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ margin: 0, fontSize: 13, color: '#374151' }}>{log.message}</p>
-                    </div>
-                    <span style={{ fontSize: 11, color: '#9ca3af', flexShrink: 0 }}>{timeAgo(log.ran_at)}</span>
-                  </div>
-                ))}
+                <div style={{ textAlign: 'center', padding: '24px 20px' }}>
+                  <Activity size={28} color="#d1d5db" style={{ margin: '0 auto 10px', display: 'block' }} />
+                  <p style={{ fontSize: 13, fontWeight: 600, color: '#374151', margin: '0 0 4px' }}>No activity yet</p>
+                  <p style={{ fontSize: 12, color: '#9ca3af', margin: 0 }}>Run logs will appear here once your automation is active</p>
+                </div>
               </div>
             </div>
           )}
