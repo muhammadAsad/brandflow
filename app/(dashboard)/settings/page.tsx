@@ -221,18 +221,44 @@ function BillingSection({ currentPlan }: { currentPlan: string }) {
   const [upgradeError, setUpgradeError]   = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Dynamic plan prices from Admin → Settings ────────────────────────────
-  const [prices, setPrices] = useState<{ pro: number; enterprise: number }>({ pro: 29, enterprise: 99 });
+  // ── Dynamic settings from Admin → Settings ──────────────────────────────
+  const [siteSettings, setSiteSettings] = useState({
+    pro_plan_price: 29, enterprise_plan_price: 99,
+    max_pro_posts: 500, max_enterprise_posts: -1,
+    max_pro_contacts: 5000, max_enterprise_contacts: -1,
+  });
   useEffect(() => {
-    fetch('/api/plans')
+    fetch('/api/settings')
       .then(r => r.json())
-      .then((d: { pro: number; enterprise: number }) => setPrices({ pro: d.pro, enterprise: d.enterprise }))
-      .catch(() => {/* keep defaults */});
+      .then((d: typeof siteSettings) => setSiteSettings(s => ({ ...s, ...d })))
+      .catch(() => {});
   }, []);
+
+  function postsLabel(max: number) { return max === -1 ? 'Unlimited posts' : `Up to ${max} posts/mo`; }
+  function contactsLabel(max: number) { return max === -1 ? 'Unlimited contacts' : `Up to ${max} contacts`; }
 
   const PLANS = PLAN_META.map(p => ({
     ...p,
-    price: p.key === 'pro' ? prices.pro : prices.enterprise,
+    price: p.key === 'pro' ? siteSettings.pro_plan_price : siteSettings.enterprise_plan_price,
+    features: p.key === 'pro'
+      ? [
+          postsLabel(siteSettings.max_pro_posts),
+          '10 social accounts',
+          'AI content generation',
+          'Analytics dashboard',
+          contactsLabel(siteSettings.max_pro_contacts),
+          'Priority support',
+        ]
+      : [
+          'Everything in Pro',
+          'Unlimited social accounts',
+          postsLabel(siteSettings.max_enterprise_posts),
+          contactsLabel(siteSettings.max_enterprise_contacts),
+          'Team collaboration',
+          'Custom integrations',
+          'Dedicated account manager',
+          'SLA uptime guarantee',
+        ],
   }));
 
   // Debounced promo validation

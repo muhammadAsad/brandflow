@@ -36,6 +36,27 @@ export async function POST(request: NextRequest) {
   const { name, email, phone, company, job_title, status, source, tags, notes, linkedin, instagram, twitter } = body;
   if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
 
+  // ── Plan limit check ─────────────────────────────────────────────────────────
+  const { data: profile } = await supabase.from('profiles').select('plan').eq('user_id', user.id).single();
+  const plan = profile?.plan ?? 'free';
+  const limitKey = `max_${plan}_contacts`;
+
+  const { data: limitRow } = await supabase
+    .from('system_settings').select('value').eq('key', limitKey).single();
+  const limit = Number(limitRow?.value ?? (plan === 'free' ? 100 : plan === 'pro' ? 5000 : -1));
+
+  if (limit !== -1) {
+    const { count } = await supabase
+      .from('contacts').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+    if ((count ?? 0) >= limit) {
+      return NextResponse.json(
+        { error: `You've reached the ${limit}-contact limit for the ${plan} plan. Upgrade to add more contacts.` },
+        { status: 403 }
+      );
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────────
+
   const { data, error } = await supabase.from('contacts').insert({
     user_id: user.id,
     name: name.trim(),

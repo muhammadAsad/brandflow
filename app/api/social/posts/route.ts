@@ -41,6 +41,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
     }
 
+    // ── Plan limit check ───────────────────────────────────────────────────────
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('user_id', user.id).single();
+    const plan = profile?.plan ?? 'free';
+    const limitKey = `max_${plan}_posts`;
+
+    const { data: limitRow } = await supabase
+      .from('system_settings').select('value').eq('key', limitKey).single();
+    const limit = Number(limitRow?.value ?? (plan === 'free' ? 10 : plan === 'pro' ? 500 : -1));
+
+    if (limit !== -1) {
+      const { count } = await supabase
+        .from('posts').select('id', { count: 'exact', head: true }).eq('user_id', user.id);
+      if ((count ?? 0) >= limit) {
+        return NextResponse.json(
+          { error: `You've reached the ${limit}-post limit for the ${plan} plan. Upgrade to create more posts.` },
+          { status: 403 }
+        );
+      }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     const { data, error } = await supabase.from('posts').insert({
       user_id:      user.id,
       content:      content.trim(),

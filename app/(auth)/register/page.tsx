@@ -44,8 +44,17 @@ function RegisterForm() {
   const [promoLoading, setPromoLoading] = useState(false);
   const [error, setError]             = useState('');
   const [loading, setLoading]         = useState(false);
+  const [registrationsOpen, setRegistrationsOpen] = useState<boolean | null>(null); // null = loading
   const router  = useRouter();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Check if registrations are open ───────────────────────────────────────
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then((d: { allow_registrations: boolean }) => setRegistrationsOpen(d.allow_registrations !== false))
+      .catch(() => setRegistrationsOpen(true)); // default open on error
+  }, []);
 
   // ── Validate promo from URL on mount ───────────────────────────────────────
   useEffect(() => {
@@ -124,6 +133,19 @@ function RegisterForm() {
           <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: '#0f172a' }}>Create your account</h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: '#94a3b8' }}>Start growing your brand smarter</p>
         </div>
+
+        {/* Registrations closed */}
+        {registrationsOpen === false && (
+          <div style={{ background: '#fff7ed', border: '1.5px solid #fed7aa', borderRadius: 12, padding: '20px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 8 }}>🔒</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#92400e', marginBottom: 6 }}>Registrations Closed</div>
+            <div style={{ fontSize: 14, color: '#78350f' }}>New sign-ups are temporarily disabled. Please check back later or contact support.</div>
+            <Link href="/login" style={{ display: 'inline-block', marginTop: 16, fontSize: 13, color: '#7c3aed', fontWeight: 600, textDecoration: 'none' }}>← Back to sign in</Link>
+          </div>
+        )}
+
+        {/* Form — only shown when registrations are open (or still loading) */}
+        {registrationsOpen !== false && (<>
 
         {/* Promo banner (URL-applied code) */}
         {isUrlPromo && promoResult?.valid && (
@@ -243,6 +265,8 @@ function RegisterForm() {
           Already have an account?{' '}
           <Link href="/login" style={{ color: '#7c3aed', fontWeight: 600, textDecoration: 'none' }}>Sign in</Link>
         </p>
+
+        </>)} {/* end registrationsOpen !== false */}
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
