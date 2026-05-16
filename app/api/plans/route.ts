@@ -1,17 +1,19 @@
-import { createAdminClient } from '@/lib/supabase-admin';
+import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-/**
- * Public endpoint — no auth required.
- * Returns the current plan prices as set by the admin in system_settings.
- * The upgrade page reads these so price changes in the admin panel are
- * instantly reflected on the client without any code changes.
- */
-export const revalidate = 60; // cache for 60 s, then re-fetch
+// No cache — admin price changes must reflect immediately
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const db = createAdminClient();
+    // Use anon key — system_settings has a public SELECT policy (USING TRUE)
+    // so no service-role key is required for reads.
+    const db = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } }
+    );
+
     const { data, error } = await db
       .from('system_settings')
       .select('key, value')
