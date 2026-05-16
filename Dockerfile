@@ -13,16 +13,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time public env vars (safe to bake in — these are already public)
-ARG NEXT_PUBLIC_SUPABASE_URL
-ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-ARG NEXT_PUBLIC_APP_URL
-
-ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
-ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=$NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+# Build-time public env vars — baked directly so GitHub CI always has them.
+# NEXT_PUBLIC_* keys are intentionally public (safe to commit).
+ENV NEXT_PUBLIC_SUPABASE_URL="https://ycvnqrvcgwvvatzbtqrt.supabase.co"
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY="sb_publishable_W22YHEHc_J0v1XF_idKG0g_FWXUiCPl"
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="placeholder"
+ENV NEXT_PUBLIC_APP_URL="https://brandflow.fly.dev"
 
 RUN npm run build
 
