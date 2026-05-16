@@ -82,6 +82,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [confirmMaintenance, setConfirmMaintenance] = useState(false);
   const [confirmWipe, setConfirmWipe] = useState(false);
@@ -103,15 +104,25 @@ export default function SettingsPage() {
 
   const saveAll = async () => {
     setSaving(true);
+    setSaveError('');
     try {
-      await fetch('/api/admin/settings', {
+      const res = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    } catch { /* ignore */ }
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSaveError(data.error || `Server error (${res.status})`);
+        setTimeout(() => setSaveError(''), 6000);
+      }
+    } catch (e) {
+      setSaveError('Network error — check your connection');
+      setTimeout(() => setSaveError(''), 6000);
+    }
     setSaving(false);
   };
 
@@ -137,7 +148,12 @@ export default function SettingsPage() {
           <h1 style={{ fontSize: 26, fontWeight: 700, color: '#f1f5f9', margin: 0 }}>Settings</h1>
           <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: 14 }}>Global system configuration</p>
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {saveError && (
+            <span style={{ fontSize: 13, color: '#f87171', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 8, padding: '6px 12px' }}>
+              ✕ {saveError}
+            </span>
+          )}
           <button onClick={fetchSettings} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#94a3b8', cursor: 'pointer', fontSize: 14 }}>
             <RefreshCw size={14} />
           </button>

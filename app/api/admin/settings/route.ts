@@ -1,14 +1,22 @@
 import { createClient } from '@/lib/supabase-server';
-import { createAdminClient } from '@/lib/supabase-admin';
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * Returns the admin's authenticated server client so all DB operations
+ * run under the admin's session (satisfying the "Admin full access" RLS
+ * policy) — no service-role key required.
+ */
 async function requireAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const { data: profile } = await supabase.from('profiles').select('is_admin,email').eq('user_id', user.id).single();
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin,email')
+    .eq('user_id', user.id)
+    .single();
   if (!profile?.is_admin) return null;
-  return { user, profile };
+  return { user, profile, db: supabase };
 }
 
 /** GET — return all settings as a plain key→value object (not an array) */
@@ -17,8 +25,11 @@ export async function GET() {
     const admin = await requireAdmin();
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    const db = createAdminClient();
-    const { data, error } = await db.from('system_settings').select('key,value').order('key');
+    const { data, error } = await admin.db
+      .from('system_settings')
+      .select('key,value')
+      .order('key');
+
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     // Convert [{key, value}] array → {key: value} object so the settings
@@ -27,7 +38,10 @@ export async function GET() {
     for (const row of data ?? []) map[row.key] = row.value;
 
     return NextResponse.json({ settings: map });
-  } catch { return NextResponse.json({ error: 'Internal error' }, { status: 500 }); }
+  } catch (e) {
+    console.error('[admin/settings GET]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
 
 /**
@@ -41,7 +55,6 @@ export async function POST(request: NextRequest) {
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const body = await request.json() as Record<string, unknown>;
-    const db   = createAdminClient();
     const now  = new Date().toISOString();
 
     const rows = Object.entries(body).map(([key, value]) => ({
@@ -51,13 +64,16 @@ export async function POST(request: NextRequest) {
       updated_at: now,
     }));
 
-    const { error } = await db
+    const { error } = await admin.db
       .from('system_settings')
       .upsert(rows, { onConflict: 'key' });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[admin/settings POST] upsert error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    await db.from('admin_logs').insert({
+    await admin.db.from('admin_logs').insert({
       admin_id:    admin.user.id,
       admin_email: admin.profile.email,
       action:      'Updated system settings (bulk save)',
@@ -65,7 +81,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch { return NextResponse.json({ error: 'Internal error' }, { status: 500 }); }
+  } catch (e) {
+    console.error('[admin/settings POST]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
 
 /**
@@ -79,18 +98,20 @@ export async function PATCH(request: NextRequest) {
     const { key, value } = await request.json();
     if (!key) return NextResponse.json({ error: 'key required' }, { status: 400 });
 
-    const db  = createAdminClient();
     const now = new Date().toISOString();
 
-    const { data, error } = await db
+    const { data, error } = await admin.db
       .from('system_settings')
       .upsert({ key, value, updated_by: admin.user.id, updated_at: now }, { onConflict: 'key' })
       .select()
       .single();
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('[admin/settings PATCH] upsert error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
-    await db.from('admin_logs').insert({
+    await admin.db.from('admin_logs').insert({
       admin_id:    admin.user.id,
       admin_email: admin.profile.email,
       action:      `Updated setting: ${key}`,
@@ -98,5 +119,8 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({ setting: data });
-  } catch { return NextResponse.json({ error: 'Internal error' }, { status: 500 }); }
+  } catch (e) {
+    console.error('[admin/settings PATCH]', e);
+    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+  }
 }
