@@ -375,6 +375,34 @@ function BillingSection({ currentPlan }: { currentPlan: string }) {
 
 function SettingsContent() {
   const { user, loading } = useAuth();
+  const [fullName,     setFullName]     = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileToast,  setProfileToast]  = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+  // Populate controlled inputs once user loads
+  useEffect(() => {
+    if (user?.full_name) setFullName(user.full_name);
+  }, [user?.full_name]);
+
+  const saveProfile = async () => {
+    if (!user) return;
+    setProfileSaving(true);
+    setProfileToast(null);
+    try {
+      const supabase = (await import('@/lib/supabase-browser')).createClient();
+      // Update auth metadata
+      const { error: authErr } = await supabase.auth.updateUser({ data: { full_name: fullName.trim() } });
+      if (authErr) throw authErr;
+      // Update profiles table
+      await supabase.from('profiles').update({ full_name: fullName.trim() }).eq('user_id', user.id);
+      setProfileToast({ type: 'success', msg: 'Profile saved successfully!' });
+    } catch {
+      setProfileToast({ type: 'error', msg: 'Failed to save. Please try again.' });
+    } finally {
+      setProfileSaving(false);
+      setTimeout(() => setProfileToast(null), 3500);
+    }
+  };
 
   if (loading) {
     return (
@@ -396,19 +424,42 @@ function SettingsContent() {
       <div style={{ background: '#fff', borderRadius: 16, padding: 28, border: '1px solid #ede9fe', boxShadow: '0 2px 12px rgba(124,58,237,0.06)' }}>
         <h2 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 800, color: '#0f172a' }}>Profile</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-          {[
-            { label: 'Full Name', val: user?.full_name ?? '' },
-            { label: 'Email',     val: user?.email ?? '' },
-          ].map(f => (
-            <div key={f.label}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6 }}>{f.label}</label>
-              <input defaultValue={f.val} style={{ width: '100%', height: 40, borderRadius: 8, border: '1.5px solid #e2e8f0', padding: '0 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box', background: '#fafaf9', color: '#1e293b' }} />
-            </div>
-          ))}
+          <div>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6 }}>Full Name</label>
+            <input
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              style={{ width: '100%', height: 40, borderRadius: 8, border: '1.5px solid #e2e8f0', padding: '0 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box', background: '#fafaf9', color: '#1e293b' }}
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 6 }}>Email</label>
+            <input
+              defaultValue={user?.email ?? ''}
+              disabled
+              style={{ width: '100%', height: 40, borderRadius: 8, border: '1.5px solid #e2e8f0', padding: '0 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box', background: '#f1f5f9', color: '#94a3b8', cursor: 'not-allowed' }}
+            />
+          </div>
         </div>
-        <button style={{ height: 38, padding: '0 18px', borderRadius: 8, background: '#7c3aed', border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
-          Save Changes
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={saveProfile}
+            disabled={profileSaving}
+            style={{ height: 38, padding: '0 18px', borderRadius: 8, background: '#7c3aed', border: 'none', color: '#fff', fontSize: 13, fontWeight: 700, cursor: profileSaving ? 'wait' : 'pointer', opacity: profileSaving ? 0.7 : 1 }}
+          >
+            {profileSaving ? 'Saving…' : 'Save Changes'}
+          </button>
+          {profileToast && (
+            <span style={{
+              fontSize: 13, fontWeight: 600, padding: '6px 14px', borderRadius: 8,
+              background: profileToast.type === 'success' ? '#f0fdf4' : '#fef2f2',
+              color:      profileToast.type === 'success' ? '#15803d' : '#dc2626',
+              border:     `1px solid ${profileToast.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            }}>
+              {profileToast.type === 'success' ? '✓ ' : '✕ '}{profileToast.msg}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Billing & Plan */}

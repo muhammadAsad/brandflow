@@ -48,6 +48,23 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; label: string }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+function getMonthGrid(date: Date): Date[][] {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+  const start    = getMondayOf(firstDay);
+  const weeks: Date[][] = [];
+  let cur = new Date(start);
+  while (cur <= lastDay || weeks.length < 4) {
+    const week: Date[] = [];
+    for (let i = 0; i < 7; i++) { week.push(new Date(cur)); cur = addDays(cur, 1); }
+    weeks.push(week);
+    if (cur > lastDay && weeks.length >= 4) break;
+  }
+  return weeks;
+}
+
 function getMondayOf(d: Date): Date {
   const day = d.getDay();
   const diff = day === 0 ? -6 : 1 - day;
@@ -392,6 +409,7 @@ export default function PlannerPage() {
   const [posts, setPosts]           = useState<Post[]>([]);
   const [loading, setLoading]       = useState(true);
   const [weekStart, setWeekStart]   = useState(() => getMondayOf(new Date()));
+  const [monthDate, setMonthDate]   = useState(() => new Date());
   const [viewMode, setViewMode]     = useState<'week' | 'month'>('week');
   const [showModal, setShowModal]   = useState(false);
   const [editPost, setEditPost]     = useState<Post | null>(null);
@@ -402,9 +420,16 @@ export default function PlannerPage() {
   const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
-      const from = weekStart.toISOString();
-      const to   = addDays(weekStart, 6).toISOString();
-      const res  = await fetch(`/api/social/posts?from=${from}&to=${to}`);
+      let from: string, to: string;
+      if (viewMode === 'month') {
+        const y = monthDate.getFullYear(), m = monthDate.getMonth();
+        from = new Date(y, m, 1).toISOString();
+        to   = new Date(y, m + 1, 0, 23, 59, 59).toISOString();
+      } else {
+        from = weekStart.toISOString();
+        to   = addDays(weekStart, 6).toISOString();
+      }
+      const res = await fetch(`/api/social/posts?from=${from}&to=${to}`);
       if (!res.ok) throw new Error();
       const json = await res.json();
       setPosts(json.posts ?? []);
@@ -413,7 +438,7 @@ export default function PlannerPage() {
     } finally {
       setLoading(false);
     }
-  }, [weekStart]);
+  }, [weekStart, monthDate, viewMode]);
 
   useEffect(() => { fetchPosts(); }, [fetchPosts]);
 
@@ -482,17 +507,33 @@ export default function PlannerPage() {
               ))}
             </div>
 
-            {/* Week navigator */}
+            {/* Week / Month navigator */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#fff', borderRadius: 10, padding: '4px 8px', border: '1.5px solid #e2e8f0' }}>
-              <button onClick={() => setWeekStart(d => addDays(d, -7))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
-                <ChevronLeft size={16} />
-              </button>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', minWidth: 150, textAlign: 'center' }}>
-                {fmtDate(weekStart)} – {fmtDate(addDays(weekStart, 6))}
-              </span>
-              <button onClick={() => setWeekStart(d => addDays(d, 7))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
-                <ChevronRight size={16} />
-              </button>
+              {viewMode === 'week' ? (
+                <>
+                  <button onClick={() => setWeekStart(d => addDays(d, -7))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', minWidth: 150, textAlign: 'center' }}>
+                    {fmtDate(weekStart)} – {fmtDate(addDays(weekStart, 6))}
+                  </span>
+                  <button onClick={() => setWeekStart(d => addDays(d, 7))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
+                    <ChevronRight size={16} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={() => setMonthDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
+                    <ChevronLeft size={16} />
+                  </button>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', minWidth: 150, textAlign: 'center' }}>
+                    {monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onClick={() => setMonthDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', display: 'flex', padding: 4, borderRadius: 6 }}>
+                    <ChevronRight size={16} />
+                  </button>
+                </>
+              )}
             </div>
 
             <button
@@ -507,8 +548,70 @@ export default function PlannerPage() {
         {/* ── Two-column layout: Calendar + Sidebar ──────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: 20, alignItems: 'start' }}>
 
-          {/* ── Calendar Grid ─────────────────────────────────────────────── */}
+          {/* LEFT COLUMN — calendar (month or week) + post queue */}
           <div>
+
+          {/* ── Month Grid ────────────────────────────────────────────────── */}
+          {viewMode === 'month' && (
+            <div style={{ marginBottom: 24 }}>
+              {/* Day-of-week headers */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 6, marginBottom: 6 }}>
+                {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
+                  <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#94a3b8', padding: '4px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{d}</div>
+                ))}
+              </div>
+              {/* Weeks */}
+              {getMonthGrid(monthDate).map((week, wi) => (
+                <div key={wi} style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 6, marginBottom: 6 }}>
+                  {week.map((day, di) => {
+                    const isCurrentMonth = day.getMonth() === monthDate.getMonth();
+                    const isToday = isSameDay(day, today);
+                    const dayPosts = getPostsForDay(day);
+                    return (
+                      <div key={di} style={{
+                        background: isToday ? '#faf5ff' : '#fff',
+                        borderRadius: 10,
+                        border: isToday ? '2px solid #7c3aed' : '1.5px solid #f1f0ff',
+                        padding: '6px 8px', minHeight: 72,
+                        opacity: isCurrentMonth ? 1 : 0.35,
+                        cursor: 'default',
+                      }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: isToday ? '#7c3aed' : '#64748b', marginBottom: 4 }}>
+                          {day.getDate()}
+                        </div>
+                        {loading ? null : dayPosts.slice(0, 2).map(post => {
+                          const p = getPlatform(post.platforms[0] ?? 'instagram');
+                          return (
+                            <div key={post.id}
+                              onClick={() => { setEditPost(post); setShowModal(true); }}
+                              style={{ background: p.bg, borderRadius: 4, padding: '2px 5px', marginBottom: 2, cursor: 'pointer', borderLeft: `2px solid ${p.color}` }}
+                            >
+                              <div style={{ fontSize: 9, color: '#334155', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {post.content.slice(0, 22)}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {dayPosts.length > 2 && (
+                          <div style={{ fontSize: 9, color: '#94a3b8', fontWeight: 600 }}>+{dayPosts.length - 2} more</div>
+                        )}
+                        {dayPosts.length === 0 && isCurrentMonth && (
+                          <button
+                            onClick={() => { setEditPost(null); setShowModal(true); }}
+                            style={{ display: 'none', width: '100%', background: 'none', border: '1px dashed #e2e8f0', borderRadius: 4, padding: '2px', cursor: 'pointer', fontSize: 9, color: '#cbd5e1' }}
+                            className="month-add-btn"
+                          >+</button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── Calendar Grid (Week View) ──────────────────────────────────── */}
+          {viewMode === 'week' && <div>
             {/* Day headers */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 8, marginBottom: 8 }}>
               {weekDays.map((day, i) => {
@@ -610,6 +713,7 @@ export default function PlannerPage() {
                 })}
               </div>
             )}
+          </div>}
 
             {/* ── Post Queue Table ─────────────────────────────────────────── */}
             <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #f1f0ff', overflow: 'hidden', marginTop: 24 }}>
@@ -697,7 +801,8 @@ export default function PlannerPage() {
                 </div>
               )}
             </div>
-          </div>
+
+          </div>{/* end LEFT COLUMN */}
 
           {/* ── Right Sidebar ─────────────────────────────────────────────── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
