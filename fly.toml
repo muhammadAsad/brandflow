@@ -5,7 +5,13 @@ app = 'brandflow'
 primary_region = 'iad'   # Ashburn, VA — good default for global reach
 
 [build]
-  # Uses the Dockerfile in this directory
+  # NEXT_PUBLIC_* vars must be available at build time (baked into the bundle).
+  # These are intentionally public — safe to commit.
+  [build.args]
+    NEXT_PUBLIC_SUPABASE_URL        = "https://ycvnqrvcgwvvatzbtqrt.supabase.co"
+    NEXT_PUBLIC_SUPABASE_ANON_KEY   = "sb_publishable_W22YHEHc_J0v1XF_idKG0g_FWXUiCPl"
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = "placeholder"
+    NEXT_PUBLIC_APP_URL             = "https://brandflow.fly.dev"
 
 [http_service]
   internal_port       = 3000
