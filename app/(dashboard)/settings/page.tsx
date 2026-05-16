@@ -34,13 +34,12 @@ function discountLabel(result: PromoResult) {
   return '';
 }
 
-// ── Plan definitions ──────────────────────────────────────────────────────────
+// ── Plan definitions (prices loaded from /api/plans — set in Admin → Settings) ─
 
-const PLANS = [
+const PLAN_META = [
   {
     key: 'pro' as const,
     label: 'Pro',
-    price: 29,
     icon: <Zap size={18} color="#a78bfa" />,
     color: '#8b5cf6',
     bg: 'rgba(139,92,246,0.08)',
@@ -50,7 +49,6 @@ const PLANS = [
   {
     key: 'enterprise' as const,
     label: 'Enterprise',
-    price: 99,
     icon: <Building2 size={18} color="#fbbf24" />,
     color: '#f59e0b',
     bg: 'rgba(245,158,11,0.08)',
@@ -114,7 +112,7 @@ function PromoInput({ value, onChange, result, loading }: {
 // ── Plan card ─────────────────────────────────────────────────────────────────
 
 function PlanCard({ plan, currentPlan, promoResult, promoCode, onUpgrade, upgrading }: {
-  plan: typeof PLANS[number];
+  plan: typeof PLAN_META[number] & { price: number };
   currentPlan: string;
   promoResult: PromoResult | null;
   promoCode: string;
@@ -222,6 +220,20 @@ function BillingSection({ currentPlan }: { currentPlan: string }) {
   const [upgrading, setUpgrading]         = useState<string | null>(null);
   const [upgradeError, setUpgradeError]   = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Dynamic plan prices from Admin → Settings ────────────────────────────
+  const [prices, setPrices] = useState<{ pro: number; enterprise: number }>({ pro: 29, enterprise: 99 });
+  useEffect(() => {
+    fetch('/api/plans')
+      .then(r => r.json())
+      .then((d: { pro: number; enterprise: number }) => setPrices({ pro: d.pro, enterprise: d.enterprise }))
+      .catch(() => {/* keep defaults */});
+  }, []);
+
+  const PLANS = PLAN_META.map(p => ({
+    ...p,
+    price: p.key === 'pro' ? prices.pro : prices.enterprise,
+  }));
 
   // Debounced promo validation
   useEffect(() => {
